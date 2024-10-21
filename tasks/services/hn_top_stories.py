@@ -1,13 +1,13 @@
-import datetime
+
 from django.utils import timezone
 from asgiref.sync import sync_to_async
-import asyncio
 
 from core.models import HNItem
 from tasks.constants.constants import \
     ITEM_STATUS_NEW, \
     ITEM_CATEGORY_DEFAULT, \
-    ENDPOINT_TOPSTORIES
+    ENDPOINT_TOPSTORIES, \
+    ITEM_STATUS_PROCESS_TITLE
 from typing import List, Generator
 from itertools import islice
 
@@ -19,6 +19,14 @@ class HNAPIStoryService:
         self.hn_api = hn_api
 
     async def pull_top_stories(self, end_point: str = ENDPOINT_TOPSTORIES) -> None:
+        """
+        pull_top_stories
+        Args:
+            end_point:
+
+        Returns:
+
+        """
 
         top_stories_id = self.hn_api.get_top_stories(
             end_point=end_point,
@@ -36,7 +44,7 @@ class HNAPIStoryService:
 
         """
         items = await sync_to_async(
-            lambda: list(HNItem.objects.filter(item_status=1).values('id', 'hn_item_id')))()
+            lambda: list(HNItem.objects.filter(item_status=ITEM_STATUS_NEW).values('id', 'hn_item_id')))()
 
         item_detail_lists = (self.hn_api.get_item_detail(method='GET', item_id=item.get('hn_item_id', 0)) for item in
                              items)
@@ -82,8 +90,17 @@ class HNAPIStoryService:
                 break
             await self.async_bulk_upsert(batch, update_fields, unique_fields)
 
-    async def async_bulk_upsert(self, batch, update_fields, unique_fields):
-        print('update_fields, ', update_fields)
+    async def async_bulk_upsert(self, batch, update_fields, unique_fields) -> None:
+        """
+
+        Args:
+            batch:
+            update_fields:
+            unique_fields:
+
+        Returns:
+
+        """
         await HNItem.objects.abulk_create(
             batch,
             update_conflicts=True,

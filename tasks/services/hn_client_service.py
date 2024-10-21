@@ -1,15 +1,12 @@
 import requests as re
 import json
-from typing import List, Dict, Any
+from typing import List
 from django.utils import timezone
 from tasks.constants.constants import \
     ENDPOINT_ITEM, \
-    ENDPOINT_TOPSTORIES, \
     ENDPOINT_BESTSTORIES, \
-    ENDPOINT_NEWESTSTORIES, \
     ITEM_STATUS_PROCESS_TITLE
 from core.models import HNItem
-from datetime import datetime
 
 
 class HNClientService:
@@ -32,7 +29,6 @@ class HNClientService:
 
         """
         url_request = self.generate_url_request(end_point=end_point, item_id=0)
-        print('generate_url_request, ', url_request)
         result = []
         try:
             result = self.make_request(url_request=url_request, method=method, params=params)

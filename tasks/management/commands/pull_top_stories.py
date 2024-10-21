@@ -26,11 +26,9 @@ class Command(BaseCommand):
         tasks = HNTasks(hn_service=hn_service)
         scheduler = self.setup_executors()
 
-        tasks.update_hn_items()
-
         # Add job to scheduler
-        # scheduler.add_job(tasks.pull_top_stories, 'interval', seconds=10)  # Adjust timing as needed
-        # scheduler.add_job(tasks.update_hn_items, 'interval', seconds=10)  # Adjust timing as needed
+        scheduler.add_job(tasks.pull_top_stories, 'interval', seconds=3600)  # Adjust timing as needed
+        scheduler.add_job(tasks.update_hn_items, 'interval', seconds=1800)  # Adjust timing as needed
 
         # Start the scheduler
         scheduler.start()
