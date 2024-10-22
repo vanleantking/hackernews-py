@@ -7,6 +7,10 @@ from tasks.tasks.pull_top_stories import HNTasks
 from tasks.services.hn_client_service import HNClientService
 from tasks.services.hn_top_stories import HNAPIStoryService
 from decouple import config
+from tasks.constants.constants import \
+    ENDPOINT_NEWESTSTORIES, \
+    ENDPOINT_BESTSTORIES
+import logging
 
 # Set up Django settings module for the scheduler
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "hackerNews.settings")
@@ -18,17 +22,43 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         # implement tasks
+        logger = logging.getLogger(__name__)
         hn_api = HNClientService(
             base_url=config('HN_BASEURL'),
             api_version=config('HN_VERSION'),
             api_format=config('HN_FORMAT_API'))
         hn_service = HNAPIStoryService(hn_api=hn_api)
-        tasks = HNTasks(hn_service=hn_service)
+        tasks = HNTasks(hn_service=hn_service, logger=logger)
         scheduler = self.setup_executors()
 
         # Add job to scheduler
-        scheduler.add_job(tasks.pull_top_stories, 'interval', seconds=3600)  # Adjust timing as needed
-        scheduler.add_job(tasks.update_hn_items, 'interval', seconds=1800)  # Adjust timing as needed
+        scheduler.add_job(
+            func=tasks.pull_top_stories,
+            trigger='interval',
+            minutes=10)
+        scheduler.add_job(
+            func=tasks.pull_top_stories,
+            trigger='interval',
+            minutes=5,
+            kwargs={
+                'end_point': ENDPOINT_NEWESTSTORIES
+            }
+        )
+        scheduler.add_job(
+            func=tasks.pull_top_stories,
+            trigger='interval',
+            minutes=180,
+            kwargs={
+                'end_point': ENDPOINT_BESTSTORIES
+            }
+        )
+        scheduler.add_job(
+            func=tasks.update_hn_items,
+            trigger='interval',
+            seconds=180)
+
+        all_jobs = scheduler.get_jobs()
+        print('all_jobs ', all_jobs)
 
         # Start the scheduler
         scheduler.start()

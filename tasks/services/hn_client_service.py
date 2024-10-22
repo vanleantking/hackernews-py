@@ -72,6 +72,7 @@ class HNClientService:
                 item_title=item.get("title", ""),
                 item_type=item.get("type", ""),
                 item_url=item.get("url", ""),
+                item_content=item.get("text", ""),
                 item_status=ITEM_STATUS_PROCESS_TITLE,
                 updated_at=timezone.now(),
                 created_at=timezone.now()

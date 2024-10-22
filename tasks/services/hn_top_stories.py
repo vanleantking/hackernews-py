@@ -6,10 +6,10 @@ from core.models import HNItem
 from tasks.constants.constants import \
     ITEM_STATUS_NEW, \
     ITEM_CATEGORY_DEFAULT, \
-    ENDPOINT_TOPSTORIES, \
-    ITEM_STATUS_PROCESS_TITLE
+    ENDPOINT_TOPSTORIES
 from typing import List, Generator
 from itertools import islice
+from time import sleep
 
 
 class HNAPIStoryService:
@@ -45,7 +45,7 @@ class HNAPIStoryService:
         """
         items = await sync_to_async(
             lambda: list(HNItem.objects.filter(item_status=ITEM_STATUS_NEW).values('id', 'hn_item_id')))()
-
+        print('length need to process, ', len(items))
         item_detail_lists = (self.hn_api.get_item_detail(method='GET', item_id=item.get('hn_item_id', 0)) for item in
                              items)
 
@@ -101,6 +101,7 @@ class HNAPIStoryService:
         Returns:
 
         """
+        sleep(5)
         await HNItem.objects.abulk_create(
             batch,
             update_conflicts=True,
