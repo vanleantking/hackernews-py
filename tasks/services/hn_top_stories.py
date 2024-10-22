@@ -59,6 +59,7 @@ class HNAPIStoryService:
                 'item_score',
                 'created_time',
                 'item_title',
+                'item_content',
                 'item_type',
                 'item_url',
                 'item_status',
