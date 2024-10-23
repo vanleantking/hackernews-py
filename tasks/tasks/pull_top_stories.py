@@ -11,9 +11,9 @@ class HNTasks:
         self.hn_service = hn_service
         self.logger = logger
 
-    def pull_top_stories(self, end_point=ENDPOINT_TOPSTORIES):
+    def pull_top_stories(self, end_point=ENDPOINT_TOPSTORIES) -> None:
         """
-
+        pull_top_stories: pull [top-stories, best-stories, newest-stories] from hn-api
         Args:
             end_point:
 
@@ -27,9 +27,9 @@ class HNTasks:
         except Exception as exp:
             self.logger.info(f"oops something unexpected happened {exp}")
 
-    def update_hn_items(self):
+    def update_hn_items(self) -> None:
         """
-
+        update_hn_items: process update title && score from item-detail api service
         Returns:
 
         """

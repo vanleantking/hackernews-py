@@ -1,4 +1,3 @@
-
 from django.utils import timezone
 from asgiref.sync import sync_to_async
 
@@ -44,7 +43,7 @@ class HNAPIStoryService:
 
         """
         items = await sync_to_async(
-            lambda: list(HNItem.objects.filter(item_status=ITEM_STATUS_NEW).values('id', 'hn_item_id')))()
+            lambda: list(HNItem.objects.filter(item_title=None).values('id', 'hn_item_id')))()
         print('length need to process, ', len(items))
         item_detail_lists = (self.hn_api.get_item_detail(method='GET', item_id=item.get('hn_item_id', 0)) for item in
                              items)
@@ -68,11 +67,11 @@ class HNAPIStoryService:
             unique_fields=['hn_item_id'])
 
     async def bulk_create(
-        self,
-        lst: Generator[HNItem, None, None],
-        batch_size: int = 100,
-        update_fields=['item_title', 'item_score', 'updated_at'],
-        unique_fields=['hn_item_id']
+            self,
+            lst: Generator[HNItem, None, None],
+            batch_size: int = 100,
+            update_fields=['item_title', 'item_score', 'updated_at'],
+            unique_fields=['hn_item_id']
     ) -> None:
         """
         bulk_create: upsert list of models into db
