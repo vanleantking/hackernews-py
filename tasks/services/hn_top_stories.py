@@ -90,10 +90,17 @@ class HNAPIStoryService:
                 break
             await self.async_bulk_upsert(batch, update_fields, unique_fields)
 
-    async def async_bulk_upsert(self, batch, update_fields, unique_fields) -> None:
+    async def async_bulk_upsert(
+            self,
+            batch: List[HNItem],
+            update_fields: List[str],
+            unique_fields: List[str],
+            batch_size: int
+    ) -> None:
         """
 
         Args:
+            batch_size:
             batch:
             update_fields:
             unique_fields:
@@ -103,7 +110,8 @@ class HNAPIStoryService:
         """
         sleep(5)
         await HNItem.objects.abulk_create(
-            batch,
+            batch=batch,
+            batch_size=batch_size,
             update_conflicts=True,
             update_fields=update_fields,
             unique_fields=unique_fields)

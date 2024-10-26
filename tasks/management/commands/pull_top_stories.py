@@ -30,16 +30,17 @@ class Command(BaseCommand):
         hn_service = HNAPIStoryService(hn_api=hn_api)
         tasks = HNTasks(hn_service=hn_service, logger=logger)
         scheduler = self.setup_executors()
+        # tasks.update_hn_items()
 
         # Add job to scheduler
         scheduler.add_job(
             func=tasks.pull_top_stories,
             trigger='interval',
-            minutes=10)
+            minutes=17)
         scheduler.add_job(
             func=tasks.pull_top_stories,
             trigger='interval',
-            minutes=5,
+            minutes=13,
             kwargs={
                 'end_point': ENDPOINT_NEWESTSTORIES
             }
@@ -47,7 +48,7 @@ class Command(BaseCommand):
         scheduler.add_job(
             func=tasks.pull_top_stories,
             trigger='interval',
-            minutes=180,
+            minutes=181,
             kwargs={
                 'end_point': ENDPOINT_BESTSTORIES
             }
@@ -55,7 +56,7 @@ class Command(BaseCommand):
         scheduler.add_job(
             func=tasks.update_hn_items,
             trigger='interval',
-            seconds=180)
+            minutes=18)
 
         all_jobs = scheduler.get_jobs()
         print('all_jobs ', all_jobs)
