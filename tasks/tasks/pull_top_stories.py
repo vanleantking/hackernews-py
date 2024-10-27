@@ -1,6 +1,7 @@
 # Add this in your tasks.py or views.py
 from tasks.constants.constants import ENDPOINT_TOPSTORIES
 import asyncio
+from datetime import datetime
 import logging
 
 
@@ -21,12 +22,15 @@ class HNTasks:
 
         """
         try:
+            print('process ', end_point, datetime.now().strftime('%d/%m/%Y, %H:%M:%S'))
             self.logger.info(f"logging for endpoint {end_point}")
-            return asyncio.run(self.hn_service.pull_top_stories(end_point))
+            asyncio.run(self.hn_service.pull_top_stories(end_point))
+            # self.hn_service.pull_top_stories(end_point)
             self.logger.info(f"process endpoint success {end_point}")
+            # print('process ', end_point)
         except Exception as exp:
             self.logger.info(f"oops something unexpected happened {exp}")
-
+        print('process success', end_point, datetime.now().strftime('%d/%m/%Y, %H:%M:%S'))
     def update_hn_items(self) -> None:
         """
         update_hn_items: process update title && score from item-detail api service

@@ -9,6 +9,7 @@ from tasks.constants.constants import \
 from typing import List, Generator
 from itertools import islice
 from time import sleep
+from django.db.models import Q
 
 
 class HNAPIStoryService:
@@ -43,7 +44,7 @@ class HNAPIStoryService:
 
         """
         items = await sync_to_async(
-            lambda: list(HNItem.objects.filter(item_title=None).values('id', 'hn_item_id')))()
+            lambda: list(HNItem.objects.filter(Q(item_title=None) | Q(item_title='')).values('id', 'hn_item_id')))()
         print('length need to process, ', len(items))
         item_detail_lists = (self.hn_api.get_item_detail(method='GET', item_id=item.get('hn_item_id', 0)) for item in
                              items)
@@ -70,7 +71,7 @@ class HNAPIStoryService:
             self,
             lst: Generator[HNItem, None, None],
             batch_size: int = 100,
-            update_fields=['item_title', 'item_score', 'updated_at'],
+            update_fields=['item_title', 'updated_at'],
             unique_fields=['hn_item_id']
     ) -> None:
         """
@@ -88,7 +89,12 @@ class HNAPIStoryService:
             batch = list(islice(lst, batch_size))
             if not batch:
                 break
-            await self.async_bulk_upsert(batch, update_fields, unique_fields)
+            await HNItem.objects.abulk_create(
+                batch,
+                update_conflicts=True,
+                update_fields=update_fields,
+                unique_fields=unique_fields)
+            # await self.async_bulk_upsert(batch, update_fields=update_fields, unique_fields=unique_fields)
 
     async def async_bulk_upsert(
             self,
@@ -108,13 +114,16 @@ class HNAPIStoryService:
         Returns:
 
         """
-        sleep(5)
-        await HNItem.objects.abulk_create(
-            batch=batch,
-            batch_size=batch_size,
-            update_conflicts=True,
-            update_fields=update_fields,
-            unique_fields=unique_fields)
+        try:
+            print('batch, ', batch)
+
+            await HNItem.objects.abulk_create(
+                batch,
+                update_conflicts=True,
+                update_fields=update_fields,
+                unique_fields=unique_fields)
+        except Exception as exp:
+            print('exp, ', exp)
 
     @staticmethod
     def convert_entities_from_list(ids: List[int]) -> Generator[HNItem, None, None]:
@@ -130,6 +139,7 @@ class HNAPIStoryService:
         return (HNItem(
             hn_item_id=item_id,
             item_status=ITEM_STATUS_NEW,
+            item_url='',
             updated_at=now,
             created_at=now,
             category_id=ITEM_CATEGORY_DEFAULT) for item_id in ids)

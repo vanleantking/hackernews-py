@@ -30,7 +30,6 @@ class Command(BaseCommand):
         hn_service = HNAPIStoryService(hn_api=hn_api)
         tasks = HNTasks(hn_service=hn_service, logger=logger)
         scheduler = self.setup_executors()
-        # tasks.update_hn_items()
 
         # Add job to scheduler
         scheduler.add_job(
